@@ -16,8 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
   StateMachineController? controller;
   SMIBool? isChecking;
   SMIBool? isHandsUp;
-  SMIBool? trigSuccess;
-  SMIBool? trigFail;
+  // 1. CORRECCIÓN: SMIBool -> SMITrigger
+  SMITrigger? trigSuccess; // ✅ Corregido
+  SMITrigger? trigFail; // ✅ Corregido
   SMINumber? numLook; //2.1 variable para el recorrido de la memoria
 
   final emailFocus = FocusNode();
@@ -25,6 +26,60 @@ class _LoginScreenState extends State<LoginScreen> {
 
   //3.3 Timer para detener la mirada al dejar de teclear
   Timer? _typingDebounce;
+  //4.1 Controllers
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController(); //son los verdaderos chismosos
+
+  //4.2 Errores para mostrar en la UI
+  String? emialError;
+  String? passError;
+
+  // 4.3 Validadores
+  bool isValidEmail(String email) {
+    final re = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    return re.hasMatch(email);
+  }
+
+  bool isValidPassword(String pass) {
+    // mínimo 8, una mayúscula, una minúscula, un dígito y un especial
+    final re = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$',
+    );
+    return re.hasMatch(pass);
+  }
+
+  //4.4 Acción al botón
+  void _onLogin() {
+    final email = emailCtrl.text.trim();
+    final pass = passCtrl.text;
+
+    //Recalcular errores
+    final eError = isValidEmail(email) ? null : "Email inválido";
+    final pError = isValidPassword(pass)
+        ? null
+        : "Mínimo 8 caracteres, 1 Mayuscula, 1 Número, 1 Minuscula y 1 Caracter Especial";
+
+    //Para avisar que hubo un cambio (mostrar errores)
+    setState(() {
+      emialError = eError;
+      passError = pError;
+    });
+
+    //4.5 Cerrar el teclado y bajar las manos
+    FocusScope.of(context).unfocus();
+    _typingDebounce?.cancel();
+    isChecking?.change(false);
+    isHandsUp?.change(false);
+    numLook?.value = 50.0; //Mirada neutral
+
+    //4.6 Activar triggers
+    // EL MÉTODO FIRE() YA FUNCIONA AQUÍ
+    if (eError == null && pError == null) {
+      trigSuccess?.fire();
+    } else {
+      trigFail?.fire();
+    }
+  }
 
   // 2) Listeners (Oyentes/Chismosito)
   @override
@@ -36,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         if (emailFocus.hasFocus) {
           isHandsUp?.change(false);
-          //2.2  mirada neutral al escribir al enfocar email
+          //2.2 mirada neutral al escribir al enfocar email
           numLook?.value = 50.0;
           isHandsUp?.change(false);
 
@@ -53,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
     passFocus.addListener(() {
       setState(() {
         // Manos arriba en password (tapa los ojos)
-        isHandsUp?.change(passFocus.hasFocus);
+        isHandsUp?.change(passFocus.hasFocus && _obscurePassword);
         // Desactiva la animación "checking" cuando está en el campo de contraseña
         isChecking?.change(false);
       });
@@ -66,6 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
     // Es crucial liberar los recursos de FocusNode y Rive Controller
     emailFocus.dispose();
     passFocus.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    _typingDebounce?.cancel();
     controller?.dispose();
     super.dispose();
   }
@@ -78,145 +136,161 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              SizedBox(
-                width: size.width,
-                height: 200,
-                child: RiveAnimation.asset(
-                  'assets/animated_login_character.riv',
-                  stateMachines: ["Login Machine"],
-                  onInit: (artboard) {
-                    controller = StateMachineController.fromArtboard(
-                      artboard,
-                      "Login Machine",
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  width: size.width,
+                  height: 200,
+                  child: RiveAnimation.asset(
+                    'assets/animated_login_character.riv',
+                    stateMachines: ["Login Machine"],
+                    onInit: (artboard) {
+                      controller = StateMachineController.fromArtboard(
+                        artboard,
+                        "Login Machine",
+                      );
+                      if (controller == null) return;
+                      artboard.addController(controller!);
+
+                      isChecking = controller!.findSMI<SMIBool>('isChecking');
+                      isHandsUp = controller!.findSMI<SMIBool>('isHandsUp');
+                      // 2. CORRECCIÓN: findSMI<SMIBool> -> findSMI<SMITrigger>
+                      trigSuccess = controller!.findSMI<SMITrigger>(
+                        'trigSuccess',
+                      ); // ✅ Corregido
+                      trigFail = controller!.findSMI<SMITrigger>(
+                        'trigFail',
+                      ); // ✅ Corregido
+                      //2.3 enlazar variable con la animacion
+                      numLook = controller!.findSMI('numLook');
+                    }, //clamp
+                  ),
+                ),
+                //Espacio entre el oso y el texto email
+                const SizedBox(height: 10),
+                //campo de texto del email
+                TextField(
+                  focusNode: emailFocus, // Asignación de FocusNode
+                  //4.8 Enlazar controller al Texfield
+                  controller: emailCtrl,
+                  onChanged: (value) {
+                    isChecking?.change(value.isNotEmpty);
+                    isHandsUp?.change(false);
+                    //ajustes de limite de 0 a 100
+                    //80 es una medida de calibracion
+                    final look = (value.length / 120.0 * 100.0).clamp(
+                      0.0,
+                      100.0,
                     );
-                    if (controller == null) return;
-                    artboard.addController(controller!);
+                    numLook?.value = look;
+                    //3.3 Debounce para detener la mirada al dejar de teclear, reinicia si vuelve a teclear
 
-                    isChecking = controller!.findSMI<SMIBool>('isChecking');
-                    isHandsUp = controller!.findSMI<SMIBool>('isHandsUp');
-                    trigSuccess = controller!.findSMI<SMIBool>('trigSuccess');
-                    trigFail = controller!.findSMI<SMIBool>('trigFail');
-                    //2.3 enlazar variable con la animacion
-                    numLook = controller!.findSMI('numLook');
-                  }, //clamp
-                ),
-              ),
-              //Espacio entre el oso y el texto email
-              const SizedBox(height: 10),
-              //campo de texto del email
-              TextField(
-                focusNode: emailFocus, // Asignación de FocusNode
-                onChanged: (value) {
-                  isChecking?.change(value.isNotEmpty);
-                  isHandsUp?.change(false);
-                  //ajustes de limite de 0 a 100
-                  //80 es una medida de calibracion
-                  final look = (value.length / 120.0 * 100.0).clamp(0.0, 100.0);
-                  numLook?.value = look;
-                  //3.3 Debounce para detener la mirada al dejar de teclear, reinicia si vuelve a teclear
-
-                  _typingDebounce?.cancel(); //cancela cualquier timer activo
-                  _typingDebounce = Timer(const Duration(seconds: 3), () {
-                    if (!mounted) {
-                      return; // si la pantalla se cierra
-                    }
-                    //mirada neutra
-                    isChecking?.change(false);
-                  });
-                },
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: "Email",
-                  prefixIcon: const Icon(Icons.mail),
-                  border: OutlineInputBorder(
-                    //esquina redondeadas
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              //campo de texto para password
-              TextField(
-                focusNode: passFocus, // Asignación de FocusNode
-                onChanged: (value) {
-                  // No es necesario cambiar la lógica de manos aquí, se gestiona con el focusListener.
-                  // Si quieres que las manos se levanten solo si hay focus Y estás escribiendo:
-                  // isHandsUp?.change(passFocus.hasFocus);
-                },
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
+                    _typingDebounce?.cancel(); //cancela cualquier timer activo
+                    _typingDebounce = Timer(
+                      const Duration(milliseconds: 1500),
+                      () {
+                        if (!mounted) {
+                          return; // si la pantalla se cierra
+                        }
+                        //mirada neutra
+                        isChecking?.change(false);
+                        numLook?.value = 50.0;
+                      },
+                    );
+                  },
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                    prefixIcon: const Icon(Icons.mail),
+                    errorText: emialError,
+                    border: OutlineInputBorder(
+                      //esquina redondeadas
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                        isHandsUp?.change(
-                          _obscurePassword && passFocus.hasFocus,
-                        );
-                      });
-                    },
                   ),
-                  border: OutlineInputBorder(
-                    //esquina redondeadas
+                ),
+                const SizedBox(height: 10),
+                //campo de texto para password
+                TextField(
+                  focusNode: passFocus, // Asignación de FocusNode
+                  controller: passCtrl,
+                  onChanged: (value) {
+                    // No es necesario cambiar la lógica de manos aquí, se gestiona con el focusListener.
+                  },
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                    prefixIcon: const Icon(Icons.lock),
+                    errorText: passError,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                          isHandsUp?.change(
+                            _obscurePassword && passFocus.hasFocus,
+                          );
+                        });
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      //esquina redondeadas
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: size.width,
+                  child: const Text(
+                    "Forgot Password?",
+                    textAlign: TextAlign.right, //alinear texto a la derecha
+                    style: TextStyle(decoration: TextDecoration.underline),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                MaterialButton(
+                  minWidth: size.width,
+                  height: 50,
+                  color: Colors.purple,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  onPressed: _onLogin,
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: size.width,
-                child: const Text(
-                  "Forgot Password?",
-                  textAlign: TextAlign.right, //alinear texto a la derecha
-                  style: TextStyle(decoration: TextDecoration.underline),
-                ),
-              ),
-              const SizedBox(height: 10),
-              MaterialButton(
-                minWidth: size.width,
-                height: 50,
-                color: Colors.purple,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                onPressed: () {
-                  // Ejemplo: llamar a trigSuccess o trigFail al presionar el botón
-                  // trigSuccess?.change(true);
-                  // trigFail?.change(true);
-                },
-                child: Text("Login", style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: size.width,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account?"),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
