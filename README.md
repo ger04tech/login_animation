@@ -1,6 +1,6 @@
 # Animated Login with Rive
 
-HOLA
+![](https://github.com/ger04tech/login_animation/blob/main/CAPTURA%20LOGIN.png)
 
 ## Getting Started
 
