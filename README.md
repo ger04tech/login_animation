@@ -38,13 +38,4 @@ A State Machine in Rive is a visual programming system that manages animation st
 - Dart 3.1 - Programming language
 
 ## 📁Project Structure
-lib/
-├── login_screen.dart          # Main login screen with Rive integration
-│   ├── State Machine Controllers
-│   ├── Form Validation Logic
-│   ├── Animation Handlers
-│   └── UI Components
-└── main.dart                  # Application entry point
 
-assets/
-├── animated_login_character.riv  # Rive animation file
