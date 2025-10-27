@@ -1,6 +1,6 @@
-# login_animation
+# Animated Login with Rive
 
-A new Flutter project.
+HOLA
 
 ## Getting Started
 
