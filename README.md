@@ -6,14 +6,14 @@
 An interactive login screen featuring a Rive-animated character that responds in real-time to user input. The character provides visual feedback through eye movements, hand gestures, and emotional reactions during the login process
 
 ## ✨ Key Features
--🐻 Interactive Character that reacts to form interactions
--👀 Smart Eye Tracking - follows typing progress in email field
--🙈 Hand Animation - covers eyes when password is hidden
--✅ Real-time Validation - dynamic checklist updates as you type
--🎭 State Machine Control - seamless animation transitions
--⏳ Loading States - prevents double-tap and shows progress
--📋 Dynamic Checklist - visual feedback for validation rules
--⌨️ Debounced Input - smooth character reactions
+1. 🐻 Interactive Character that reacts to form interactions
+2. 👀 Smart Eye Tracking - follows typing progress in email field
+3. 🙈 Hand Animation - covers eyes when password is hidden
+4. ✅ Real-time Validation - dynamic checklist updates as you type
+5. 🎭 State Machine Control - seamless animation transitions
+6. ⏳ Loading States - prevents double-tap and shows progress
+7. 📋 Dynamic Checklist - visual feedback for validation rules
+8. ⌨️ Debounced Input - smooth character reactions
 
 ##🤔 What is Rive?
 Rive is a powerful real-time animation platform that allows developers to create interactive vector animations. Unlike static animations, Rive animations can be controlled programmatically through state machines and input parameters.
