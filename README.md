@@ -32,10 +32,19 @@ A State Machine in Rive is a visual programming system that manages animation st
 - trigFail - Disappointment animation for invalid login
 - numLook - Controls eye movement based on input length
 
+## 🛠️Technologies Used
+- Flutter 3.19 - Cross-platform UI framework
+- Rive 0.10.1 - Interactive animations
+- Dart 3.1 - Programming language
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 📁Project Structure
+lib/
+├── login_screen.dart          # Main login screen with Rive integration
+│   ├── State Machine Controllers
+│   ├── Form Validation Logic
+│   ├── Animation Handlers
+│   └── UI Components
+└── main.dart                  # Application entry point
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+assets/
+├── animated_login_character.riv  # Rive animation file
