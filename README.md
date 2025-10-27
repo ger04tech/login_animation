@@ -39,5 +39,14 @@ A State Machine in Rive is a visual programming system that manages animation st
 
 ## 📁Project Structure
 ![](https://github.com/ger04tech/login_animation/blob/main/Estructura.png)
-## Demo
+## 📹Demo
 ![](https://github.com/ger04tech/login_animation/blob/main/Animation_Bear.gif)
+## 🎓Academic Information
+- Course: Graficación 
+- Professor: Rodrigo Fidel Gaxiola Sosa
+- Institution: Tecnologico de Mérida
+- Estudent: Germán Gael Sansores Negrón
+## 🙏Credits
+- Animated Login Character
+    - JcToon
+    - link: https://rive.app/marketplace/2244-7248-animated-login-character
