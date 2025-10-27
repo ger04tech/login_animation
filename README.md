@@ -25,8 +25,12 @@ A State Machine in Rive is a visual programming system that manages animation st
 2. States: Animation sequences (idle, checking, hands up, etc.)
 3. Transitions: Rules for moving between states
 4. Outputs: Animation properties controlled in real-time
-## In this projec
+## 😁In this project
 - isChecking - Character looks at typing cursor
+- isHandsUp - Hands cover eyes for password protection
+- trigSuccess - Celebration animation for valid login
+- trigFail - Disappointment animation for invalid login
+- numLook - Controls eye movement based on input length
 
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
