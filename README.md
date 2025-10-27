@@ -39,3 +39,5 @@ A State Machine in Rive is a visual programming system that manages animation st
 
 ## 📁Project Structure
 ![](https://github.com/ger04tech/login_animation/blob/main/Estructura.png)
+## Demo
+![](https://github.com/ger04tech/login_animation/blob/main/Animation_Bear.gif)
