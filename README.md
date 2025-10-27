@@ -15,18 +15,19 @@ An interactive login screen featuring a Rive-animated character that responds in
 7. 📋 Dynamic Checklist - visual feedback for validation rules
 8. ⌨️ Debounced Input - smooth character reactions
 
-##🤔 What is Rive?
+## 🤔 What is Rive?
 Rive is a powerful real-time animation platform that allows developers to create interactive vector animations. Unlike static animations, Rive animations can be controlled programmatically through state machines and input parameters.
 
-##🎮 State Machine Concept
+## 🎮 State Machine Concept
 A State Machine in Rive is a visual programming system that manages animation states and transitions:
 
 1. Inputs: Boolean values, numbers, and triggers
 2. States: Animation sequences (idle, checking, hands up, etc.)
 3. Transitions: Rules for moving between states
 4. Outputs: Animation properties controlled in real-time
-   - In this projec
-   - 
+## In this projec
+- isChecking - Character looks at typing cursor
+
 
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
