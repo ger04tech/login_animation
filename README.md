@@ -38,4 +38,4 @@ A State Machine in Rive is a visual programming system that manages animation st
 - Dart 3.1 - Programming language
 
 ## 📁Project Structure
-
+![](https://github.com/ger04tech/login_animation/blob/main/Estructura.png)
